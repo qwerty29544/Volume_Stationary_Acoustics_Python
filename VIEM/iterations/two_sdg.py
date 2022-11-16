@@ -39,7 +39,7 @@ def TwoSGD_nu_1d_sim(matrix_A,  # Квадратная матрица опера
     delta_u = vector_u1 - vector_u0
     k = 3
     norm_f = dot_complex(vector_f, vector_f)
-    if (dot_complex(delta_u, delta_u) / norm_f < eps):
+    if (np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f) < eps):
         return vector_u1, k
     vector_u2 = vector_u1
     for iter in range(max_iter):
@@ -56,7 +56,7 @@ def TwoSGD_nu_1d_sim(matrix_A,  # Квадратная матрица опера
         vector_u2 = vector_u1 - \
                     ((-a2 * a2) * (vector_u1 - vector_u0) + (a1 * a2) * As_r) / denom
         delta_u = vector_u2 - vector_u1
-        accuracy = dot_complex(delta_u, delta_u) / norm_f
+        accuracy = np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f)
         # print(accuracy)
         if (accuracy < eps):
             break

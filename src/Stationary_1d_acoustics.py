@@ -65,7 +65,7 @@ def test_grid():
 
 
 def problem_1d():
-    N = 100000
+    N = 10000
     k = 1.0
     lower = -1.0
     upper = 1.0
