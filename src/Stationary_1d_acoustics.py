@@ -8,6 +8,7 @@ from VIEM.waves.waves_1d import wave_narmonic_1d
 from VIEM.fourier_mul.fourier_mul_1d import fourier_complex_matrix_vector_1d
 from VIEM.shapes.linear_1d import linear_grid
 from VIEM.iterations.two_sdg import TwoSGD_nu_1d_sim
+from VIEM.utils.config_1d import Problem1dAcoustic
 
 
 def test_refr():
@@ -65,43 +66,10 @@ def test_grid():
 
 
 def problem_1d():
-    N = 10000
-    k = 1.0
-    lower = -1.0
-    upper = 1.0
-    e = 1.0
-    orientation = 1.0
-    refr_opts = {
-        "refr_1": {
-            "type": "step",
-            "lower": -0.6,
-            "upper": 0.7,
-            "refr_real": 1.0,
-            "refr_imag": 1.0
-        },
-        "refr_2": {
-            "type": "step",
-            "lower": -0.3,
-            "upper": 0.2,
-            "refr_real": -0.5,
-            "refr_imag": -0.5
-        }
-    }
-
-    collocations, _, h = linear_grid(lower, upper, N)
-    refraction = np.zeros((N,), complex)
-    for i in range(len(refr_opts)):
-        dict = refr_opts.get("refr_" + str(i + 1))
-        if dict.get("type") == "step":
-            refraction += step_refr_1d(collocations,
-                                       dict.get("lower"),
-                                       dict.get("upper"),
-                                       dict.get("refr_real") + 1.0j * dict.get("refr_imag"))
-    f_vector = wave_narmonic_1d(collocations, k, e, orientation)
-    matrix_row = (-1.0 * k**2) * kernel_helmholtz_1d_neg(collocations[0, None], collocations[None, :], k)[0] * h
-    result = TwoSGD_nu_1d_sim(matrix_row, f_vector, refraction)
-    print(result)
-
+    problem_test = Problem1dAcoustic(filename="../resources/config_1d.json")
+    problem_test.set_problem()
+    problem_test.compute_problem()
+    problem_test.save_results()
     return 0
 
 

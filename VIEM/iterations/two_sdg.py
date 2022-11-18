@@ -38,16 +38,21 @@ def TwoSGD_nu_1d_sim(matrix_A,  # Квадратная матрица опера
                 As_r
     delta_u = vector_u1 - vector_u0
     k = 3
+    accuracy = []
+    iterations = []
+    iterations.append(k)
     norm_f = dot_complex(vector_f, vector_f)
-    if (np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f) < eps):
-        return vector_u1, k
+    accuracy.append(np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f))
+    if (accuracy[0] < eps):
+        return vector_u1, iterations, accuracy
     vector_u2 = vector_u1
-    for iter in range(max_iter):
+    for iter in nb.prange(max_iter):
         vector_r1 = vector_u1 + fourier_complex_matrix_vector_1d(matrix_A, (vector_u1 * vector_nu)) - vector_f
         delta_r = vector_r1 - vector_r0  # Разница между невязками
         As_r = vector_r1 + fourier_complex_matrix_vector_1d(matrix_As, vector_r1) * np.conj(vector_nu)  #
         A_As_r = As_r + fourier_complex_matrix_vector_1d(matrix_A, (As_r * vector_nu))
         k += 3  # Умножений матрицы на вектор
+        iterations.append(k)
         a1 = dot_complex(delta_r, delta_r)
         a2 = dot_complex(As_r, As_r)
         a3 = dot_complex(A_As_r, A_As_r)
@@ -56,11 +61,12 @@ def TwoSGD_nu_1d_sim(matrix_A,  # Квадратная матрица опера
         vector_u2 = vector_u1 - \
                     ((-a2 * a2) * (vector_u1 - vector_u0) + (a1 * a2) * As_r) / denom
         delta_u = vector_u2 - vector_u1
-        accuracy = np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f)
+        accuracy_iter = np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f)
+        accuracy.append(accuracy_iter)
         # print(accuracy)
-        if (accuracy < eps):
+        if (accuracy_iter < eps):
             break
         vector_r0 = np.copy(vector_r1)
         vector_u0 = np.copy(vector_u1)
         vector_u1 = np.copy(vector_u2)
-    return vector_u2, k
+    return vector_u2, iterations, accuracy

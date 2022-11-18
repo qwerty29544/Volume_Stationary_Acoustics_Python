@@ -1,0 +1,18 @@
+{
+  "dir_path": "/home/leonblue/PycharmProjects/Volume_Stationary_Acoustics_Python/resources/experiment4",
+  "n": 200000,
+  "k": 12.0,
+  "lower": -3.0,
+  "upper": 3.0,
+  "e": 4.0,
+  "orientation": -1.0,
+  "refr_opts": {
+        "refr_1": {
+          "type": "step",
+          "lower": -1.0,
+          "upper": 1.0,
+          "refr_real": 0.15,
+          "refr_imag": 0.15
+        }
+    }
+}
