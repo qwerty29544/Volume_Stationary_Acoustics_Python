@@ -7,7 +7,7 @@ from VIEM.utils.weights import exp_weight, linear_weight
 from VIEM.waves.waves_1d import wave_narmonic_1d
 from VIEM.fourier_mul.fourier_mul_1d import fourier_complex_matrix_vector_1d
 from VIEM.shapes.linear_1d import linear_grid
-from VIEM.iterations.two_sdg import TwoSGD_nu_1d_sim
+from VIEM.iterations.two_sdg_symmetric_1d import TwoSGD_nu_1d_sim
 from VIEM.utils.config_1d import Problem1dAcoustic
 
 

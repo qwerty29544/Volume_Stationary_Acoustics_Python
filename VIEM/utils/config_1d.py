@@ -10,7 +10,7 @@ from VIEM.refractions.refractions_1d import step_refr_1d, gauss_refr_1d
 from VIEM.utils.save_load_vecs import save_np_file_txt, load_np_file_txt
 from VIEM.waves.waves_1d import wave_narmonic_1d
 from VIEM.kernels.kernels_1d import kernel_helmholtz_1d_pos
-from VIEM.iterations.two_sdg import TwoSGD_nu_1d_sim
+from VIEM.iterations.two_sdg_symmetric_1d import TwoSGD_nu_1d_sim
 from VIEM.visualisation.visual_1d import plot_1d_result_refr_acoustics
 
 
