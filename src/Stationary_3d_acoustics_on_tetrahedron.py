@@ -26,9 +26,11 @@ def compute_distances(array_collocations):
     matrix_shape = (dim_len, dim_len)
     distances = np.zeros(matrix_shape)
     # applying for all tetrahedrons
-    for rut in nb.prange(dim_len):
-        for colloc in nb.prange(dim_len):
-            distances[rut][colloc] = np.sqrt(array_collocations[rut].dot(array_collocations[colloc]))
+    for rut in nb.prange(dim_len - 1):
+        for colloc in nb.prange(rut + 1, dim_len):
+            dist = array_collocations[rut] - array_collocations[colloc]
+            distances[rut][colloc] = np.sqrt(dist.dot(dist))
+            distances[colloc][rut] = distances[rut][colloc]
     return distances
 
 
@@ -62,10 +64,8 @@ def main():
     print(sphere_volumes.shape)
     print(sphere_volumes)
     print(sphere_collocations.shape)
-    print(sphere_dists)
+    print("dists", sphere_dists)
     print()
-
-
     return 0
 
 
