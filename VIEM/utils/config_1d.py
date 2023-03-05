@@ -8,7 +8,7 @@ import numba as nb
 from VIEM.shapes.linear_1d import linear_grid
 from VIEM.refractions.refractions_1d import step_refr_1d, gauss_refr_1d
 from VIEM.utils.save_load_vecs import save_np_file_txt, load_np_file_txt
-from VIEM.waves.waves_1d import wave_narmonic_1d
+from VIEM.waves.waves_1d import wave_harmonic_1d
 from VIEM.kernels.kernels_1d import kernel_helmholtz_1d_pos
 from VIEM.iterations.two_sdg_symmetric_1d import TwoSGD_nu_1d_sim
 from VIEM.visualisation.visual_1d import plot_1d_result_refr_acoustics
@@ -112,7 +112,7 @@ class Problem1dAcoustic:
     def set_problem(self, filename=None):
         self.collocations, _, self.cell_width = linear_grid(self._lower, self._upper, self._n)
         self.refractions_colloc = self._refr_compute(self.collocations, self._n, self._refr_opts)
-        self.free_vec = wave_narmonic_1d(self.collocations, self._k, self._e, self._orientation)
+        self.free_vec = wave_harmonic_1d(self.collocations, self._k, self._e, self._orientation)
         self.matrix_row = -1.0 * (self._k**2) * kernel_helmholtz_1d_pos(x=self.collocations[0, None],
                                                                         y=self.collocations[None, :],
                                                                         k=self._k)[0] * self.cell_width

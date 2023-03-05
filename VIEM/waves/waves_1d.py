@@ -3,7 +3,7 @@ import numba as nb
 
 
 # Функция вектора свободных членов
-def wave_narmonic_1d(x, k=1.0, e=1.0, orientation=1.0):
+def wave_harmonic_1d(x, k=1.0, e=1.0, orientation=1.0):
     """
     incoming harmonic wave with monochromatic spectre f(x) = e * (isin(kx) + cos(ikx))
 
