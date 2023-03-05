@@ -3,12 +3,17 @@ import numba as nb
 import gmsh
 import sys
 import json
+import matplotlib.pyplot as plt
 import os
 from VIEM.utils.gmsh_parser import GMSHParser
 from VIEM.kernels.kernels_3d import kernel_helmholtz_3d
 import VIEM.refractions.refractions_3d as refrs_3d
 from VIEM.waves.waves_3d import wave_harmonic_3d
 from VIEM.iterations.two_sgd import TwoSGD
+
+
+plt.rcParams.update({'font.size': 18})
+
 
 def compute_volumes_tetrahedron(array_vertexes_3d):
     array_vertexes_first = np.repeat(a=array_vertexes_3d, repeats=[3, 0, 0, 0], axis=1)
@@ -95,12 +100,25 @@ def main():
     free_vec = wave_harmonic_3d(sphere_collocations, k=4.0)
     G_matrix = sphere_coeffs * sphere_volumes
 
-    result, iters, accuracy = TwoSGD(matrix_A=(-k**2) * G_matrix,
-                                     vector_f=(-1 * G_matrix) @ free_vec)
+    result_TwoSGD, iters_TwoSGD, accuracy_TwoSGD, resid_TwoSGD = TwoSGD(matrix_A=(-k**2) * G_matrix,
+                                                                        vector_f=(-1 * G_matrix) @ free_vec)
 
-    print(result)
-    print(iters)
-    print(accuracy)
+    # График итераций на норме ве
+    plt.figure(figsize=(12, 10), dpi=100)
+    plt.plot(iters_TwoSGD, accuracy_TwoSGD, color='#AA2200', label="TwoSGD")
+    plt.xlabel("Количество умножений матрицы на вектор")
+    plt.ylabel("Норма относительного изменения приближения")
+    plt.title("Сходимость итерационых методов")
+    plt.legend()
+    plt.savefig("..\\resources\\figures\\iterations_accuracy.png")
+
+    plt.figure(figsize=(12, 10), dpi=100)
+    plt.plot(iters_TwoSGD, resid_TwoSGD, color='#AA2200', label="TwoSGD")
+    plt.xlabel("Количество умножений матрицы на вектор")
+    plt.ylabel("Норма невязки на итерации")
+    plt.title("Сходимость итерационых методов")
+    plt.legend()
+    plt.savefig("..\\resources\\figures\\iterations_resid.png")
 
     return 0
 

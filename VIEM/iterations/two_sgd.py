@@ -36,11 +36,13 @@ def TwoSGD(matrix_A,  # Квадратная матрица оператора
     k = 3
     accuracy = []
     iterations = []
+    resid = []
     iterations.append(k)
     norm_f = dot_complex(vector_f, vector_f)
     accuracy.append(np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f))
+    resid.append(np.sqrt(np.real(vector_r0.dot(vector_r0.T))))
     if (accuracy[0] < eps):
-        return vector_u1, iterations, accuracy
+        return vector_u1, iterations, accuracy, resid
     vector_u2 = vector_u1
     for iter in nb.prange(max_iter):
         vector_r1 = vector_u1 + matrix_A @ (vector_u1 * vector_nu) - vector_f
@@ -59,10 +61,11 @@ def TwoSGD(matrix_A,  # Квадратная матрица оператора
         delta_u = vector_u2 - vector_u1
         accuracy_iter = np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f)
         accuracy.append(accuracy_iter)
+        resid.append(np.sqrt(np.real(vector_r1.dot(vector_r1.T))))
         # print(accuracy)
         if (accuracy_iter < eps):
             break
         vector_r0 = np.copy(vector_r1)
         vector_u0 = np.copy(vector_u1)
         vector_u1 = np.copy(vector_u2)
-    return vector_u2, iterations, accuracy
+    return vector_u2, iterations, accuracy, resid
