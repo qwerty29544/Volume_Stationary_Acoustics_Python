@@ -1,10 +1,7 @@
 import numpy as np
 import numba as nb
+from VIEM.iterations.iter_utils import dot_complex
 
-# Функция скалярного произведения комплексных векторов
-@nb.njit(fastmath=True)
-def dot_complex(vector_c1, vector_c2):
-    return vector_c1.dot(np.conj(vector_c2))
 
 
 @nb.njit(fastmath=True)
@@ -61,7 +58,7 @@ def TwoSGD(matrix_A,  # Квадратная матрица оператора
         delta_u = vector_u2 - vector_u1
         accuracy_iter = np.real(dot_complex(delta_u, delta_u)) / np.real(norm_f)
         accuracy.append(accuracy_iter)
-        resid.append(np.sqrt(np.real(vector_r1.dot(vector_r1.T))))
+        resid.append(np.real(np.sqrt(vector_r1.dot(vector_r1.T))))
         # print(accuracy)
         if (accuracy_iter < eps):
             break

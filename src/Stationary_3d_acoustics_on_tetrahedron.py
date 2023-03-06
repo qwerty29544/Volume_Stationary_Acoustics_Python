@@ -10,7 +10,9 @@ from VIEM.kernels.kernels_3d import kernel_helmholtz_3d
 import VIEM.refractions.refractions_3d as refrs_3d
 from VIEM.waves.waves_3d import wave_harmonic_3d
 from VIEM.iterations.two_sgd import TwoSGD
-
+from VIEM.iterations.IMRES import IMRES_nu
+from VIEM.iterations.BiCGStab import BiCGStab_nu
+from VIEM.iterations.iter_utils import dot_complex
 
 plt.rcParams.update({'font.size': 18})
 
@@ -101,11 +103,22 @@ def main():
     G_matrix = sphere_coeffs * sphere_volumes
 
     result_TwoSGD, iters_TwoSGD, accuracy_TwoSGD, resid_TwoSGD = TwoSGD(matrix_A=(-k**2) * G_matrix,
-                                                                        vector_f=(-1 * G_matrix) @ free_vec)
+                                                                        vector_f=(-1 * G_matrix) @ free_vec,
+                                                                        vector_nu=sphere_refractions)
+
+    result_BiCG, iters_BiCG, accuracy_BiCG, resid_BiCG = BiCGStab_nu(matrix_A=(-k**2) * G_matrix,
+                                                                     vector_f=(-1 * G_matrix) @ free_vec,
+                                                                     vector_nu=sphere_refractions)
+
+    result_IMRES, iters_IMRES, accuracy_IMRES, resid_IMRES = IMRES_nu(matrix_A=(-k ** 2) * G_matrix,
+                                                                      vector_f=(-1 * G_matrix) @ free_vec,
+                                                                      vector_nu=sphere_refractions)
 
     # График итераций на норме ве
     plt.figure(figsize=(12, 10), dpi=100)
     plt.plot(iters_TwoSGD, accuracy_TwoSGD, color='#AA2200', label="TwoSGD")
+    plt.plot(iters_BiCG, accuracy_BiCG, color='#0022AA', label="BiCGStab")
+    plt.plot(iters_IMRES, accuracy_IMRES, color='#224488', label="IMRES")
     plt.xlabel("Количество умножений матрицы на вектор")
     plt.ylabel("Норма относительного изменения приближения")
     plt.title("Сходимость итерационых методов")
@@ -114,19 +127,34 @@ def main():
 
     plt.figure(figsize=(12, 10), dpi=100)
     plt.plot(iters_TwoSGD, resid_TwoSGD, color='#AA2200', label="TwoSGD")
+    plt.plot(iters_BiCG, resid_BiCG, color='#0022AA', label="BiCGStab")
+    plt.plot(iters_IMRES, resid_IMRES, color='#224488', label="IMRES")
     plt.xlabel("Количество умножений матрицы на вектор")
     plt.ylabel("Норма невязки на итерации")
     plt.title("Сходимость итерационых методов")
     plt.legend()
     plt.savefig("..\\resources\\figures\\iterations_resid.png")
 
+    print(np.isclose(result_TwoSGD, result_BiCG))
+    print(np.isclose(result_TwoSGD, result_IMRES))
+    print(np.isclose(result_BiCG, result_IMRES))
+    print(dot_complex(result_TwoSGD, result_TwoSGD))
+    print(dot_complex(result_BiCG, result_BiCG))
+    print(dot_complex(result_IMRES, result_IMRES))
+
+    plt.figure(figsize=(12, 10), dpi=100)
+    plt.plot(result_TwoSGD, color='#AA2200', label="TwoSGD", linewidth=1.5)
+    plt.plot(result_BiCG, color='#0022AA', label="BiCGStab", linewidth=1.25)
+    plt.plot(result_IMRES, color='#224488', label="IMRES", linewidth=1)
+    plt.xlabel("Номер объемного разбиения")
+    plt.ylabel("Значение функции потенциала упругости")
+    plt.title("Результат вычислений")
+    plt.xlim((0, 500))
+    plt.legend()
+    plt.savefig("..\\resources\\figures\\iterations_result.png")
     return 0
 
 
 if __name__ == "__main__":
     main()
-    # array_test = np.array([[[1, 2], [3, 4]], [[1, 3], [5, 6]]])
-    # print(array_test)
-    # print(np.repeat(array_test, [3, 0], 1))
-    # print(np.apply_along_axis(np.linalg.det, 2, array_test))
 
