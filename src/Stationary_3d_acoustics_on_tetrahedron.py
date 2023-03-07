@@ -6,6 +6,7 @@ import json
 import matplotlib.pyplot as plt
 import os
 from VIEM.utils.gmsh_parser import GMSHParser
+from VIEM.utils.visualisation import plot_cube_scatter3d
 from VIEM.kernels.kernels_3d import kernel_helmholtz_3d
 import VIEM.refractions.refractions_3d as refrs_3d
 from VIEM.waves.waves_3d import wave_harmonic_3d
@@ -67,8 +68,8 @@ def compute_coeffs_matrix_simple(collocations_3d, kernel_func, k=1.0):
 
 def main():
     config = {
-        "k": 2.0,
-        "d": [1.0, 0.5, 0.5],
+        "k": 1.0,
+        "d": [1.0, 0.0, 0.0],
         "E0": 1.0,
         "path_to_mesh": "..\\resources\\mesh\\sphere.msh"
     }
@@ -85,34 +86,37 @@ def main():
     sphere_coeffs = compute_coeffs_matrix_simple(sphere_collocations, kernel_helmholtz_3d, k)
     sphere_dists = compute_distances(sphere_collocations)
     sphere_refractions = (
-        refrs_3d.step_refr_3d_cube(
-            collocations_3d=sphere_collocations,
-            center=np.array([0.2, 0.2, 0.2]),
-            radius=0.4,
-            refraction=2.0 + 2.0j
-        ) +
+        # refrs_3d.step_refr_3d_cube(
+        #     collocations_3d=sphere_collocations,
+        #     center=np.array([0.2, 0.2, 0.2]),
+        #     radius=0.8,
+        #     refraction=5.0 + 4.0j
+        # ) +
         refrs_3d.step_refr_3d_sphere(
             collocations_3d=sphere_collocations,
             center=np.array([0.0, 0.0, 0.0]),
             radius=10.0,
-            refraction=1.0 + 0.0j
+            refraction=2.0 + 1.0j
         ) -
         1.0
     )
-    free_vec = wave_harmonic_3d(sphere_collocations, k=4.0)
+    free_vec = wave_harmonic_3d(sphere_collocations, k=k)
     G_matrix = sphere_coeffs * sphere_volumes
 
-    result_TwoSGD, iters_TwoSGD, accuracy_TwoSGD, resid_TwoSGD = TwoSGD(matrix_A=(-k**2) * G_matrix,
+    result_TwoSGD, iters_TwoSGD, accuracy_TwoSGD, resid_TwoSGD = TwoSGD(matrix_A=-(k**2) * G_matrix,
                                                                         vector_f=(-1 * G_matrix) @ free_vec,
-                                                                        vector_nu=sphere_refractions)
+                                                                        vector_nu=sphere_refractions,
+                                                                        eps=10e-7)
 
-    result_BiCG, iters_BiCG, accuracy_BiCG, resid_BiCG = BiCGStab_nu(matrix_A=(-k**2) * G_matrix,
+    result_BiCG, iters_BiCG, accuracy_BiCG, resid_BiCG = BiCGStab_nu(matrix_A=-(k**2) * G_matrix,
                                                                      vector_f=(-1 * G_matrix) @ free_vec,
-                                                                     vector_nu=sphere_refractions)
+                                                                     vector_nu=sphere_refractions,
+                                                                     eps=10e-7)
 
-    result_IMRES, iters_IMRES, accuracy_IMRES, resid_IMRES = IMRES_nu(matrix_A=(-k ** 2) * G_matrix,
+    result_IMRES, iters_IMRES, accuracy_IMRES, resid_IMRES = IMRES_nu(matrix_A=-(k**2) * G_matrix,
                                                                       vector_f=(-1 * G_matrix) @ free_vec,
-                                                                      vector_nu=sphere_refractions)
+                                                                      vector_nu=sphere_refractions,
+                                                                      eps=10e-7)
 
     # График итераций на норме ве
     plt.figure(figsize=(12, 10), dpi=100)
@@ -152,6 +156,10 @@ def main():
     plt.xlim((0, 500))
     plt.legend()
     plt.savefig("..\\resources\\figures\\iterations_result.png")
+
+    plot_cube_scatter3d(vector_U=np.real(result_TwoSGD), cubes_collocations=sphere_collocations,
+                        title_opt="k = 4, N = 7000, Radius = 1",
+                        filename_opt="..\\resources\\figures\\result_3d.png")
     return 0
 
 
